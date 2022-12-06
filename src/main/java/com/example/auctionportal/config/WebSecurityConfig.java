@@ -1,12 +1,11 @@
 package com.example.auctionportal.config;
 
-import com.example.auctionportal.config.jwt.AuthEntryPointJwt;
-import com.example.auctionportal.config.jwt.AuthTokenFilter;
+import com.example.auctionportal.config.jwt.JwtFilter;
 import com.example.auctionportal.service.UserDetailsServiceImpl;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,18 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    final
-    UserDetailsServiceImpl userDetailsService;
-    private final AuthEntryPointJwt unauthorizedHandler;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtFilter jwtFilter;
 
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
-        this.unauthorizedHandler = unauthorizedHandler;
-    }
-
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
+        this.jwtFilter = jwtFilter;
     }
 
     @Override
@@ -40,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
-    @Bean
+    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
@@ -53,30 +46,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
+        // FIX ME
         http.cors().and().csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers("/").permitAll()
-                .antMatchers("/api/test/**").permitAll()
-                .antMatchers("/avatar/**").permitAll()
-                .antMatchers("/profile/**").permitAll()
-                .anyRequest().authenticated();
+                //.antMatchers("/auth/**").permitAll()
+                //.antMatchers("/").permitAll()
+                //.antMatchers("/api/test/**").permitAll()
+                //.antMatchers("/avatar/**").permitAll()
+                //.antMatchers("/profile/**").permitAll()
+                //.antMatchers("/users/**").permitAll()
+                //.antMatchers("/users/delete/**").permitAll()
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-//		http
-//		.authorizeRequests(authorizeRequests ->
-//				authorizeRequests
-//					.antMatchers("/board/*").hasAnyRole("MANAGER", "OPERATOR")
-//					.antMatchers("/members/*").hasRole("MANAGER")
-//					.antMatchers("/").permitAll())
-//		.httpBasic().realmName("org team")
-//		.and()
-//		.sessionManagement()
-//		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .antMatchers("/auth/signin").permitAll()
+                .antMatchers("/auth/signup").permitAll()
+                .anyRequest().authenticated().and().exceptionHandling()
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

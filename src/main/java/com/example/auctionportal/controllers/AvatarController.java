@@ -1,12 +1,14 @@
 package com.example.auctionportal.controllers;
 
 import com.example.auctionportal.dao.UserDao;
-import com.example.auctionportal.dto.AvatarRequest;
 import com.example.auctionportal.dto.MessageResponse;
 import com.example.auctionportal.models.User;
+import com.example.auctionportal.service.UserDetailsImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,14 +28,17 @@ public class AvatarController {
     }
 
     @PutMapping("/send")
-    public ResponseEntity<?> postAvatar(@ModelAttribute AvatarRequest avatarRequest) {
-        User user = userDao.findById(avatarRequest.getId()).get();
-        String fileName = avatarRequest.getImage().getOriginalFilename();
-        if (avatarRequest.getImage().getContentType().equalsIgnoreCase("image/jpg") ||
-                avatarRequest.getImage().getContentType().equalsIgnoreCase("image/png")) {
+    public ResponseEntity<?> postAvatar(@ModelAttribute MultipartFile image) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        User user = userDao.findById(userDetails.getId()).get();
+        String fileName = image.getOriginalFilename();
+        if (image.getContentType().equalsIgnoreCase("image/jpg") ||
+                image.getContentType().equalsIgnoreCase("image/png") ||
+                image.getContentType().equalsIgnoreCase("image/jpeg")) {
             String filePath = FOLDER_PATH + UUID.randomUUID() + fileName;
             try {
-                avatarRequest.getImage().transferTo(new File(filePath));
+                image.transferTo(new File(filePath));
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse("Произошла ошибка сохранения файла"));
             }
@@ -44,10 +49,11 @@ public class AvatarController {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new MessageResponse("Недопустимый формат файла"));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> retrieveAvatar(@PathVariable Long id) {
-        User user = userDao.findById(id).get();
-        String filePath = user.getAvatarFilePath();
+    @GetMapping("/get")
+    public ResponseEntity<?> retrieveAvatar() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        String filePath = userDetails.getAvatarFilePath();
         if (filePath == null) {
             filePath = FOLDER_PATH + DEFAULT_IMAGE;
         }

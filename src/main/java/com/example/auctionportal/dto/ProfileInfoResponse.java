@@ -8,11 +8,13 @@ public class ProfileInfoResponse {
     private String lastName;
     private int loginsCount;
     private String dateAndTime;
+    private String role;
 
-    public ProfileInfoResponse(String firstname, String lastName, int loginsCount) {
-        this.firstName = firstname;
+    public ProfileInfoResponse(String firstName, String lastName, int loginsCount, String role) {
+        this.firstName = firstName;
         this.lastName = lastName;
         this.loginsCount = loginsCount;
+        this.role = role;
 
         Date date = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd в HH:mm:ss");
@@ -41,6 +43,14 @@ public class ProfileInfoResponse {
 
     public void setLoginsCount(int loginsCount) {
         this.loginsCount = loginsCount;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getDateAndTime() {
