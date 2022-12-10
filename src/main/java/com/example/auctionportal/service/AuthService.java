@@ -56,7 +56,7 @@ public class AuthService {
         User user = new User(signupRequest.getFirstName(), signupRequest.getLastName(),
                 signupRequest.getEmail(), passwordEncoder.encode(signupRequest.getPassword()), ERole.ROLE_USER.name());
         user.setLoginsCount(0);
-        user.setAvatarFilePath(null);
+        user.setAvatar(null);
         userDao.save(user);
         return new MessageResponse("User CREATED");
     }

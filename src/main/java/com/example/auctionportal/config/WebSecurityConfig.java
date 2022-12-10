@@ -46,16 +46,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // FIX ME
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-                //.antMatchers("/auth/**").permitAll()
-                //.antMatchers("/").permitAll()
-                //.antMatchers("/api/test/**").permitAll()
-                //.antMatchers("/avatar/**").permitAll()
-                //.antMatchers("/profile/**").permitAll()
-                //.antMatchers("/users/**").permitAll()
-                //.antMatchers("/users/delete/**").permitAll()
 
                 .antMatchers("/auth/signin").permitAll()
                 .antMatchers("/auth/signup").permitAll()

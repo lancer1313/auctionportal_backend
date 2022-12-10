@@ -1,6 +1,7 @@
 package com.example.auctionportal.service;
 
 import com.example.auctionportal.models.User;
+import com.example.auctionportal.models.UserFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,12 +20,12 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     private String password;
     private int loginsCount;
-    private String avatarFilePath;
+    private UserFile avatar;
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(Long id, String firstName, String lastName,
                            String email, String password, int loginsCount,
-                           String avatarFilePath,
+                           UserFile avatar,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.firstName = firstName;
@@ -32,7 +33,7 @@ public class UserDetailsImpl implements UserDetails {
         this.email = email;
         this.password = password;
         this.loginsCount = loginsCount;
-        this.avatarFilePath = avatarFilePath;
+        this.avatar = avatar;
         this.authorities = authorities;
     }
 
@@ -40,7 +41,7 @@ public class UserDetailsImpl implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(user.getRole()));
         return new UserDetailsImpl(user.getId(), user.getFirstName(), user.getLastName(),
-                user.getEmail(), user.getPassword(), user.getLoginsCount(), user.getAvatarFilePath(), authorities);
+                user.getEmail(), user.getPassword(), user.getLoginsCount(), user.getAvatar(), authorities);
     }
 
     @Override
@@ -66,8 +67,8 @@ public class UserDetailsImpl implements UserDetails {
         return loginsCount;
     }
 
-    public String getAvatarFilePath() {
-        return avatarFilePath;
+    public UserFile getAvatar() {
+        return avatar;
     }
 
     public String getFirstName() {

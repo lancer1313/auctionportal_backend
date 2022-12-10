@@ -29,6 +29,7 @@ public class AdminService {
         return usersInfo;
     }
 
+    // TO DO удаляем аватар в файловой системе
     public MessageResponse deleteUser(Long id) {
         userDao.deleteById(id);
         return new MessageResponse(id.toString());
@@ -39,7 +40,7 @@ public class AdminService {
             User user = userDao.findById(id).get();
             user.setRole(role);
             userDao.save(user);
-            return new MessageResponse("Пользователю с id=" + id + " Присвоена роль " + role);
+            return new MessageResponse(id.toString());
         }
         throw new IllegalArgumentException("Такой роли не существует");
     }

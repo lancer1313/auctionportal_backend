@@ -1,5 +1,7 @@
 package com.example.auctionportal.advice;
 
+import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.InvalidFileFormatException;
 import com.example.auctionportal.exceptions.UserRegistrationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +30,22 @@ public class ApplicationExceptionHandler {
     public Map<String, String> handleInvalidRegistration(UserRegistrationException ex) {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("email", ex.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ExceptionHandler(InvalidFileFormatException.class)
+    public Map<String, String> handleInvalidFileFormats(InvalidFileFormatException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
+    @ExceptionHandler(FileSavingException.class)
+    public Map<String, String> handleFileSavingErrors(FileSavingException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", ex.getMessage());
         return errorMap;
     }
 }

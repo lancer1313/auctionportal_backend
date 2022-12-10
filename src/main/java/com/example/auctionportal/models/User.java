@@ -1,6 +1,7 @@
 package com.example.auctionportal.models;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users",
@@ -21,10 +22,14 @@ public class User {
     private String password;
     @Column(name = "logins_count")
     private int loginsCount;
-    @Column(name = "avatar_file_path")
-    private String avatarFilePath;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "avatar_id", referencedColumnName = "id")
+    private UserFile avatar;
     @Column(name = "role")
     private String role;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Lot> lots;
 
     public User(String firstName, String lastName, String email, String password, String role) {
         this.firstName = firstName;
@@ -86,12 +91,12 @@ public class User {
         this.loginsCount = loginsCount;
     }
 
-    public String getAvatarFilePath() {
-        return avatarFilePath;
+    public UserFile getAvatar() {
+        return avatar;
     }
 
-    public void setAvatarFilePath(String avatarFilePath) {
-        this.avatarFilePath = avatarFilePath;
+    public void setAvatar(UserFile avatar) {
+        this.avatar = avatar;
     }
 
     public String getRole() {
@@ -100,5 +105,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public List<Lot> getLots() {
+        return lots;
+    }
+
+    public void setLots(List<Lot> lots) {
+        this.lots = lots;
     }
 }
