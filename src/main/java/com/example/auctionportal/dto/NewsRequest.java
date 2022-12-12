@@ -3,6 +3,7 @@ package com.example.auctionportal.dto;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 public class NewsRequest {
 

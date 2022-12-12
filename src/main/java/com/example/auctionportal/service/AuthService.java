@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @Service
 public class AuthService {
 
@@ -67,5 +70,12 @@ public class AuthService {
         UserDetailsImpl userDetails = (UserDetailsImpl) principal;
         return new ProfileInfoResponse(userDetails.getFirstName(), userDetails.getLastName(),
                     userDetails.getLoginsCount(), userDetails.getAuthorities().toString());
+    }
+
+    public MessageResponse getTime() {
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd в HH:mm:ss");
+        String dateAndTime = simpleDateFormat.format(date);
+        return new MessageResponse(dateAndTime);
     }
 }

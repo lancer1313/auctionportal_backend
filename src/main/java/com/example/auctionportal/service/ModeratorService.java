@@ -4,8 +4,9 @@ import com.example.auctionportal.dao.NewsDao;
 import com.example.auctionportal.dao.NewsFileDao;
 import com.example.auctionportal.dto.MessageResponse;
 import com.example.auctionportal.dto.NewsRequest;
-import com.example.auctionportal.dto.NewsResponse;
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.dto.NewsTableResponse;
+import com.example.auctionportal.dto.NewsTimelineResponse;
+import com.example.auctionportal.exceptions.FileManagerException;
 import com.example.auctionportal.exceptions.InvalidFileFormatException;
 import com.example.auctionportal.models.News;
 import com.example.auctionportal.models.NewsFile;
@@ -30,7 +31,7 @@ public class ModeratorService {
         this.newsFileDao = newsFileDao;
     }
 
-    public MessageResponse createNews(NewsRequest newsRequest) throws FileSavingException, InvalidFileFormatException {
+    public MessageResponse createNews(NewsRequest newsRequest) throws FileManagerException, InvalidFileFormatException {
         if (newsRequest.getImage().getContentType() != null) {
             MultipartFile image = newsRequest.getImage();
             if (image.getContentType().equalsIgnoreCase("image/png") ||
@@ -40,7 +41,7 @@ public class ModeratorService {
                 try {
                     image.transferTo(new File(filePath));
                 } catch (IOException e) {
-                    throw new FileSavingException("Произошла ошибка сохранения файла");
+                    throw new FileManagerException("Произошла ошибка сохранения файла");
                 }
                 NewsFile newsFile = new NewsFile(fileName, image.getContentType(), filePath);
                 News news = new News(newsRequest.getTitle(), newsRequest.getText(), false);
@@ -56,7 +57,7 @@ public class ModeratorService {
         return new MessageResponse("Новость без картинки создана");
     }
 
-    public MessageResponse redactNews(NewsRequest newsRequest, Long id) throws InvalidFileFormatException, FileSavingException {
+    public MessageResponse redactNews(NewsRequest newsRequest, Long id) throws InvalidFileFormatException, FileManagerException {
         if (newsRequest.getImage().getContentType() != null) {
             MultipartFile image = newsRequest.getImage();
             if (image.getContentType().equalsIgnoreCase("image/png") ||
@@ -69,14 +70,21 @@ public class ModeratorService {
                 news.setRedactered(true);
                 if (news.getImage() != null) {
                     NewsFile newsFile = newsFileDao.findById(news.getImage().getId()).get();
+
+                    String deleteFilePath = newsFile.getFilePath();
+                    File deleteFile = new File(deleteFilePath);
+                    if (!deleteFile.delete()) {
+                        throw new FileManagerException("Ошибка удаления файла");
+                    }
+
                     newsFile.setName(fileName);
                     newsFile.setType(image.getContentType());
                     newsFile.setFilePath(filePath);
+
                     try {
                         image.transferTo(new File(filePath));
-                        // TO DO удаляем изображение в файловой системе
                     } catch (IOException e) {
-                        throw new FileSavingException("Ошибка сохранения файла");
+                        throw new FileManagerException("Ошибка сохранения файла");
                     }
                     newsDao.save(news);
                     news.setImage(newsFile);
@@ -86,7 +94,7 @@ public class ModeratorService {
                 try {
                     image.transferTo(new File(filePath));
                 } catch (IOException e) {
-                    throw new FileSavingException("Ошибка сохранения файла");
+                    throw new FileManagerException("Ошибка сохранения файла");
                 }
                 newsDao.save(news);
                 NewsFile newsFile = new NewsFile(fileName, image.getContentType(), filePath);
@@ -114,19 +122,35 @@ public class ModeratorService {
         return new MessageResponse("Новость изменена без добавления картинки");
     }
 
-    // TO DO удаляем изображение в файловой системе
-    public MessageResponse deleteNews(Long id) {
+    public MessageResponse deleteNews(Long id) throws FileManagerException {
+        String deleteFilePath = newsDao.findById(id).get().getImage().getFilePath();
+        File deleteFile = new File(deleteFilePath);
+        if (deleteFilePath != null) {
+            if (!deleteFile.delete()) {
+                throw new FileManagerException("Ошибка удаления файла");
+            }
+        }
         newsDao.deleteById(id);
         return new MessageResponse("Новость с id=" + id + " была удалена");
     }
 
-    public List<NewsResponse> getAllNews() {
+    public List<NewsTableResponse> getAllNewsTable() {
         List<News> allNews = newsDao.findAll();
-        List<NewsResponse> allNewsResponses = new ArrayList<>();
+        List<NewsTableResponse> allNewsResponseTable = new ArrayList<>();
         for (News news : allNews) {
-            allNewsResponses.add(new NewsResponse(news.getId(), news.getTitle(), news.getText(), news.isRedactered(),
+            allNewsResponseTable.add(new NewsTableResponse(news.getId(), news.getTitle(), news.getText(), news.isRedactered(),
                     news.getImage() != null ? news.getImage().getName() : null));
         }
-        return allNewsResponses;
+        return allNewsResponseTable;
+    }
+
+    public List<NewsTimelineResponse> getAllNewsTimeLine() {
+        List<News> allNews = newsDao.findAll();
+        List<NewsTimelineResponse> allNewsResponseTimeline = new ArrayList<>();
+        for (News news : allNews) {
+            allNewsResponseTimeline.add(new NewsTimelineResponse(news.getTitle(), news.getText(), news.isRedactered(),
+                    news.getImage() != null ? news.getImage().getFilePath() : null));
+        }
+        return allNewsResponseTimeline;
     }
 }

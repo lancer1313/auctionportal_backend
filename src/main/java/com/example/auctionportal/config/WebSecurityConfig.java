@@ -51,6 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/auth/signin").permitAll()
                 .antMatchers("/auth/signup").permitAll()
+                .antMatchers("/news/all_timeline").permitAll()
                 .anyRequest().authenticated().and().exceptionHandling()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

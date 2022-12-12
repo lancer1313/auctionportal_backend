@@ -1,6 +1,6 @@
 package com.example.auctionportal.dto;
 
-public class NewsResponse {
+public class NewsTableResponse {
 
     private Long id;
     private String title;
@@ -8,7 +8,7 @@ public class NewsResponse {
     private boolean isRedactered;
     private String fileName;
 
-    public NewsResponse(Long id, String title, String text, boolean isRedactered, String fileName) {
+    public NewsTableResponse(Long id, String title, String text, boolean isRedactered, String fileName) {
         this.id = id;
         this.title = title;
         this.text = text;

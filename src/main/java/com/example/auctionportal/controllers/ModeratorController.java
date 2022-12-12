@@ -1,7 +1,7 @@
 package com.example.auctionportal.controllers;
 
 import com.example.auctionportal.dto.NewsRequest;
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.FileManagerException;
 import com.example.auctionportal.exceptions.InvalidFileFormatException;
 import com.example.auctionportal.service.ModeratorService;
 import org.springframework.http.HttpStatus;
@@ -22,26 +22,32 @@ public class ModeratorController {
         this.moderatorService = moderatorService;
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllNews() {
-        return ResponseEntity.status(HttpStatus.OK).body(moderatorService.getAllNews());
+    @GetMapping("/all_table")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getAllNewsTable() {
+        return ResponseEntity.status(HttpStatus.OK).body(moderatorService.getAllNewsTable());
+    }
+
+    @GetMapping("/all_timeline")
+    public ResponseEntity<?> getAllNewsTimeline() {
+        return ResponseEntity.status(HttpStatus.OK).body(moderatorService.getAllNewsTimeLine());
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteNews(@PathVariable Long id) {
+    public ResponseEntity<?> deleteNews(@PathVariable Long id) throws FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(moderatorService.deleteNews(id));
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> createNews(@ModelAttribute @Valid NewsRequest newsRequest) throws InvalidFileFormatException, FileSavingException {
+    public ResponseEntity<?> createNews(@ModelAttribute @Valid NewsRequest newsRequest) throws InvalidFileFormatException, FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(moderatorService.createNews(newsRequest));
     }
 
     @PutMapping("/redact/{id}")
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> redactNews(@ModelAttribute @Valid NewsRequest newsRequest, @PathVariable Long id) throws InvalidFileFormatException, FileSavingException {
+    public ResponseEntity<?> redactNews(@ModelAttribute @Valid NewsRequest newsRequest, @PathVariable Long id) throws InvalidFileFormatException, FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(moderatorService.redactNews(newsRequest, id));
     }
 

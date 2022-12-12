@@ -1,12 +1,15 @@
 package com.example.auctionportal.controllers;
 
 import com.example.auctionportal.dto.LotRequest;
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.FileManagerException;
+import com.example.auctionportal.exceptions.NoFileFoundException;
 import com.example.auctionportal.service.LotService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/lots")
@@ -21,13 +24,13 @@ public class LotController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> createLot(@ModelAttribute LotRequest lotRequest) throws FileSavingException {
+    public ResponseEntity<?> createLot(@ModelAttribute @Valid LotRequest lotRequest) throws FileManagerException, NoFileFoundException {
         return ResponseEntity.status(HttpStatus.OK).body(lotService.createLot(lotRequest));
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteLot(@PathVariable Long id) {
+    public ResponseEntity<?> deleteLot(@PathVariable Long id) throws FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(lotService.deleteLot(id));
     }
 
@@ -38,7 +41,7 @@ public class LotController {
     }
 
     @PutMapping("/redact/{id}")
-    public ResponseEntity<?> redactLot(@ModelAttribute LotRequest lotRequest, @PathVariable Long id) throws FileSavingException {
+    public ResponseEntity<?> redactLot(@ModelAttribute @Valid LotRequest lotRequest, @PathVariable Long id) throws FileManagerException, NoFileFoundException {
         return ResponseEntity.status(HttpStatus.OK).body(lotService.redactLot(lotRequest, id));
     }
 

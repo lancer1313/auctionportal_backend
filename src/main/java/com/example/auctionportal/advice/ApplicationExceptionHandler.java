@@ -1,7 +1,8 @@
 package com.example.auctionportal.advice;
 
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.FileManagerException;
 import com.example.auctionportal.exceptions.InvalidFileFormatException;
+import com.example.auctionportal.exceptions.NoFileFoundException;
 import com.example.auctionportal.exceptions.UserRegistrationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,6 +26,16 @@ public class ApplicationExceptionHandler {
         return errorMap;
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(org.springframework.validation.BindException.class)
+    public Map<String, String> handleInvalidFormData(org.springframework.validation.BindException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        ex.getFieldErrors().forEach(error -> {
+            errorMap.put(error.getField(), error.getDefaultMessage());
+        });
+        return errorMap;
+    }
+
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     @ExceptionHandler(UserRegistrationException.class)
     public Map<String, String> handleInvalidRegistration(UserRegistrationException ex) {
@@ -42,8 +53,16 @@ public class ApplicationExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
-    @ExceptionHandler(FileSavingException.class)
-    public Map<String, String> handleFileSavingErrors(FileSavingException ex) {
+    @ExceptionHandler(FileManagerException.class)
+    public Map<String, String> handleFileSavingErrors(FileManagerException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ExceptionHandler(NoFileFoundException.class)
+    public Map<String, String> handleNoFileErrors(NoFileFoundException ex) {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("error", ex.getMessage());
         return errorMap;

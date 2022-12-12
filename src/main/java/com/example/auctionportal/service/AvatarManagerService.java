@@ -3,7 +3,7 @@ package com.example.auctionportal.service;
 import com.example.auctionportal.dao.UserDao;
 import com.example.auctionportal.dao.UserFileDao;
 import com.example.auctionportal.dto.MessageResponse;
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.FileManagerException;
 import com.example.auctionportal.exceptions.InvalidFileFormatException;
 import com.example.auctionportal.models.User;
 import com.example.auctionportal.models.UserFile;
@@ -27,7 +27,7 @@ public class AvatarManagerService {
         this.userFileDao = userFileDao;
     }
 
-    public MessageResponse postAvatar(MultipartFile image) throws FileSavingException, InvalidFileFormatException {
+    public MessageResponse postAvatar(MultipartFile image) throws FileManagerException, InvalidFileFormatException {
         if (image.getContentType().equalsIgnoreCase("image/png") ||
                 image.getContentType().equalsIgnoreCase("image/jpeg")) {
             Object principal = SecurityContextHolder.getContext()
@@ -37,10 +37,19 @@ public class AvatarManagerService {
             String fileName = image.getOriginalFilename();
             String filePath = FOLDER_PATH + UUID.randomUUID() + fileName;
             UserFile avatar = new UserFile(image.getOriginalFilename(), image.getContentType(), filePath);
+
+            String deleteFilePath = user.getAvatar().getFilePath();
+            if (deleteFilePath != null) {
+                File deleteFile = new File(deleteFilePath);
+                if (!deleteFile.delete()) {
+                    throw new FileManagerException("Ошибка удаления файла");
+                }
+            }
+
             try {
                 image.transferTo(new File(filePath));
             } catch (IOException e) {
-                throw new FileSavingException("Произошла ошибка сохранения файла");
+                throw new FileManagerException("Произошла ошибка сохранения файла");
             }
             user.setAvatar(avatar);
             userFileDao.save(avatar);

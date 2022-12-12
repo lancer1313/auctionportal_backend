@@ -1,6 +1,6 @@
 package com.example.auctionportal.controllers;
 
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.FileManagerException;
 import com.example.auctionportal.exceptions.InvalidFileFormatException;
 import com.example.auctionportal.service.AvatarManagerService;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class AvatarController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<?> postAvatar(@ModelAttribute MultipartFile image) throws InvalidFileFormatException, FileSavingException {
+    public ResponseEntity<?> postAvatar(@ModelAttribute MultipartFile image) throws InvalidFileFormatException, FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(avatarManagerService.postAvatar(image));
     }
 

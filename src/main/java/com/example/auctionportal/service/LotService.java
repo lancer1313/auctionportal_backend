@@ -6,7 +6,8 @@ import com.example.auctionportal.dao.UserDao;
 import com.example.auctionportal.dto.LotRequest;
 import com.example.auctionportal.dto.LotResponse;
 import com.example.auctionportal.dto.MessageResponse;
-import com.example.auctionportal.exceptions.FileSavingException;
+import com.example.auctionportal.exceptions.FileManagerException;
+import com.example.auctionportal.exceptions.NoFileFoundException;
 import com.example.auctionportal.models.Lot;
 import com.example.auctionportal.models.LotFile;
 import com.example.auctionportal.models.User;
@@ -35,7 +36,10 @@ public class LotService {
         this.lotFileDao = lotFileDao;
     }
 
-    public MessageResponse createLot(LotRequest lotRequest) throws FileSavingException {
+    public MessageResponse createLot(LotRequest lotRequest) throws FileManagerException, NoFileFoundException {
+        if (lotRequest.getFile().getContentType() == null) {
+            throw new NoFileFoundException("И что вы собираетесь продавать?");
+        }
         Object principal = SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         UserDetailsImpl userDetails = (UserDetailsImpl) principal;
@@ -45,12 +49,12 @@ public class LotService {
         try {
             file.transferTo(new File(filePath));
         } catch (IOException e) {
-            throw new FileSavingException("Произошла ошибка сохранения файла");
+            throw new FileManagerException("Произошла ошибка сохранения файла");
         }
         LotFile lotFile = new LotFile(fileName, file.getContentType(), filePath);
         User user = userDao.findById(userDetails.getId()).get();
         Lot lot = new Lot(lotRequest.getLotTitle(), lotRequest.getLotDescription(),
-                lotRequest.getStartingPrice(), lotRequest.getMinimalStep());
+                Integer.parseInt(lotRequest.getStartingPrice()), Integer.parseInt(lotRequest.getMinimalStep()));
         lot.setFile(lotFile);
         lot.setUser(user);
         lotDao.save(lot);
@@ -58,8 +62,12 @@ public class LotService {
         return new MessageResponse("Лот создан");
     }
 
-    // TO DO удаляем файл в файловой системе
-    public MessageResponse deleteLot(Long id) {
+    public MessageResponse deleteLot(Long id) throws FileManagerException {
+        String deleteFilePath = lotDao.findById(id).get().getFile().getFilePath();
+        File deleteFile = new File(deleteFilePath);
+        if (!deleteFile.delete()) {
+            throw new FileManagerException("Ошибка удаления файла");
+        }
         lotDao.deleteById(id);
         return new MessageResponse("Лот с id=" + id + " был удален");
     }
@@ -78,27 +86,35 @@ public class LotService {
         return lotsData;
     }
 
-    public MessageResponse redactLot(LotRequest lotRequest, Long id) throws FileSavingException {
+    public MessageResponse redactLot(LotRequest lotRequest, Long id) throws FileManagerException, NoFileFoundException {
+        if (lotRequest.getFile().getContentType() == null) {
+            throw new NoFileFoundException("И что вы собираетесь продавать?");
+        }
         MultipartFile file = lotRequest.getFile();
         Lot lot = lotDao.findById(id).get();
 
         lot.setLotTitle(lotRequest.getLotTitle());
         lot.setLotDescription(lotRequest.getLotDescription());
-        lot.setStartingPrice(lotRequest.getStartingPrice());
-        lot.setMinimalStep(lotRequest.getMinimalStep());
+        lot.setStartingPrice(Integer.parseInt(lotRequest.getStartingPrice()));
+        lot.setMinimalStep(Integer.parseInt(lotRequest.getMinimalStep()));
 
         String fileName = file.getOriginalFilename();
         String filePath = FOLDER_PATH + UUID.randomUUID() + fileName;
 
         LotFile lotFile = lotFileDao.findById(lot.getFile().getId()).get();
+        String deleteFilePath = lotFile.getFilePath();
         lotFile.setName(fileName);
         lotFile.setType(file.getContentType());
         lotFile.setFilePath(filePath);
+
+        File deleteFile = new File(deleteFilePath);
+        if (!deleteFile.delete()) {
+            throw new FileManagerException("Ошибка удаления файла");
+        }
         try {
             file.transferTo(new File(filePath));
-            // TO DO удаляем файл в файловой системе
         } catch (IOException e) {
-            throw new FileSavingException("Ошибка сохранения файла");
+            throw new FileManagerException("Ошибка сохранения файла");
         }
         lotDao.save(lot);
         lot.setFile(lotFile);

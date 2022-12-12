@@ -2,15 +2,22 @@ package com.example.auctionportal.dto;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
 public class LotRequest {
 
+    @NotBlank(message = "Это поле должно быть заполнено")
     private String lotTitle;
+    @NotBlank(message = "Это поле должно быть заполнено")
     private String lotDescription;
-    private int startingPrice;
-    private int minimalStep;
+    @Pattern(regexp = "[0-9]+", message = "Поле должно быть заполнено одним числом")
+    private String startingPrice;
+    @Pattern(regexp = "[0-9]+", message = "Поле должно быть заполнено одним числом")
+    private String minimalStep;
     private MultipartFile file;
 
-    public LotRequest(String lotTitle, String lotDescription, int startingPrice, int minimalStep, MultipartFile file) {
+    public LotRequest(String lotTitle, String lotDescription, String startingPrice, String minimalStep, MultipartFile file) {
         this.lotTitle = lotTitle;
         this.lotDescription = lotDescription;
         this.startingPrice = startingPrice;
@@ -34,19 +41,19 @@ public class LotRequest {
         this.lotDescription = lotDescription;
     }
 
-    public int getStartingPrice() {
+    public String getStartingPrice() {
         return startingPrice;
     }
 
-    public void setStartingPrice(int startingPrice) {
+    public void setStartingPrice(String startingPrice) {
         this.startingPrice = startingPrice;
     }
 
-    public int getMinimalStep() {
+    public String getMinimalStep() {
         return minimalStep;
     }
 
-    public void setMinimalStep(int minimalStep) {
+    public void setMinimalStep(String minimalStep) {
         this.minimalStep = minimalStep;
     }
 
