@@ -4,13 +4,15 @@ public class NewsTimelineResponse {
 
     private String title;
     private String text;
-    private boolean isRedacterd;
+    private String dateOfCreation;
+    private boolean isRedactered;
     private String filePath;
 
-    public NewsTimelineResponse(String title, String text, boolean isRedacterd, String filePath) {
+    public NewsTimelineResponse(String title, String text, String dateOfCreation, boolean isRedactered, String filePath) {
         this.title = title;
         this.text = text;
-        this.isRedacterd = isRedacterd;
+        this.dateOfCreation = dateOfCreation;
+        this.isRedactered = isRedactered;
         this.filePath = filePath;
     }
 
@@ -30,12 +32,20 @@ public class NewsTimelineResponse {
         this.text = text;
     }
 
-    public boolean isRedacterd() {
-        return isRedacterd;
+    public String getDateOfCreation() {
+        return dateOfCreation;
     }
 
-    public void setRedacterd(boolean redacterd) {
-        isRedacterd = redacterd;
+    public void setDateOfCreation(String dateOfCreation) {
+        this.dateOfCreation = dateOfCreation;
+    }
+
+    public boolean isRedactered() {
+        return isRedactered;
+    }
+
+    public void setRedactered(boolean redacterd) {
+        isRedactered = redacterd;
     }
 
     public String getFilePath() {

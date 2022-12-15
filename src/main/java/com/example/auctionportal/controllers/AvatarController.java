@@ -19,7 +19,7 @@ public class AvatarController {
         this.avatarManagerService = avatarManagerService;
     }
 
-    @PostMapping("/send")
+    @PutMapping("/send")
     public ResponseEntity<?> postAvatar(@ModelAttribute MultipartFile image) throws InvalidFileFormatException, FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(avatarManagerService.postAvatar(image));
     }

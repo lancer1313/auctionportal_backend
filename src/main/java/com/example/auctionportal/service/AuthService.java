@@ -74,7 +74,7 @@ public class AuthService {
 
     public MessageResponse getTime() {
         Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd в HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
         String dateAndTime = simpleDateFormat.format(date);
         return new MessageResponse(dateAndTime);
     }

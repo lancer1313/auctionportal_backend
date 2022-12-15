@@ -6,14 +6,13 @@ import javax.validation.constraints.Size;
 import java.util.Set;
 
 public class SignupRequest {
-    @NotBlank(message = "Это поле должно быть заполнено")
-    @Pattern(regexp = "[a-zA-Z \\\\u0400-\\\\u04FF]", message = "Я не знаю таких имен")
+
+    @Pattern(regexp = "[a-zA-Zа-яА-ЯёЁ]+", message = "Я не знаю таких имен")
     private String firstName;
-    @NotBlank(message = "Это поле должно быть заполнено")
-    @Pattern(regexp = "[a-zA-Z \\\\u0400-\\\\u04FF]", message = "Я не знаю таких фамилий")
+    @Pattern(regexp = "[a-zA-Zа-яА-ЯёЁ]+", message = "Я не знаю таких фамилий")
     private String lastName;
     @NotBlank(message = "Это поле должно быть заполнено")
-    @Pattern(regexp = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\\\.[A-Z]{2,6}$", message = "Неправильная почта")
+    @Pattern(regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$", message = "Неправильная почта")
     private String email;
     @Size(min = 8, max = 15, message = "Пароль должен содержать от 8 до 15 символов")
     private String password;

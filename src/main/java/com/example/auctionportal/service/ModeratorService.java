@@ -15,7 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +34,11 @@ public class ModeratorService {
     }
 
     public MessageResponse createNews(NewsRequest newsRequest) throws FileManagerException, InvalidFileFormatException {
-        if (newsRequest.getImage().getContentType() != null) {
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
+        String dateAndTime = simpleDateFormat.format(date);
+
+        if (newsRequest.getImage() != null) {
             MultipartFile image = newsRequest.getImage();
             if (image.getContentType().equalsIgnoreCase("image/png") ||
                     image.getContentType().equalsIgnoreCase("image/jpeg")) {
@@ -44,7 +50,7 @@ public class ModeratorService {
                     throw new FileManagerException("Произошла ошибка сохранения файла");
                 }
                 NewsFile newsFile = new NewsFile(fileName, image.getContentType(), filePath);
-                News news = new News(newsRequest.getTitle(), newsRequest.getText(), false);
+                News news = new News(newsRequest.getTitle(), newsRequest.getText(), dateAndTime, false);
                 news.setImage(newsFile);
                 newsDao.save(news);
                 newsFileDao.save(newsFile);
@@ -52,13 +58,13 @@ public class ModeratorService {
             }
             throw new InvalidFileFormatException("Недопустимый формат файла");
         }
-        News news = new News(newsRequest.getTitle(), newsRequest.getText(), false);
+        News news = new News(newsRequest.getTitle(), newsRequest.getText(), dateAndTime, false);
         newsDao.save(news);
         return new MessageResponse("Новость без картинки создана");
     }
 
     public MessageResponse redactNews(NewsRequest newsRequest, Long id) throws InvalidFileFormatException, FileManagerException {
-        if (newsRequest.getImage().getContentType() != null) {
+        if (newsRequest.getImage() != null) {
             MultipartFile image = newsRequest.getImage();
             if (image.getContentType().equalsIgnoreCase("image/png") ||
                     image.getContentType().equalsIgnoreCase("image/jpeg")) {
@@ -123,9 +129,10 @@ public class ModeratorService {
     }
 
     public MessageResponse deleteNews(Long id) throws FileManagerException {
-        String deleteFilePath = newsDao.findById(id).get().getImage().getFilePath();
-        File deleteFile = new File(deleteFilePath);
-        if (deleteFilePath != null) {
+        NewsFile newsFile = newsDao.findById(id).get().getImage();
+        if (newsFile != null) {
+            String deleteFilePath = newsFile.getFilePath();
+            File deleteFile = new File(deleteFilePath);
             if (!deleteFile.delete()) {
                 throw new FileManagerException("Ошибка удаления файла");
             }
@@ -138,8 +145,8 @@ public class ModeratorService {
         List<News> allNews = newsDao.findAll();
         List<NewsTableResponse> allNewsResponseTable = new ArrayList<>();
         for (News news : allNews) {
-            allNewsResponseTable.add(new NewsTableResponse(news.getId(), news.getTitle(), news.getText(), news.isRedactered(),
-                    news.getImage() != null ? news.getImage().getName() : null));
+            allNewsResponseTable.add(new NewsTableResponse(news.getId(), news.getTitle(), news.getText(),
+                    news.getDateOfCreation(), news.isRedactered(), news.getImage() != null ? news.getImage().getName() : null));
         }
         return allNewsResponseTable;
     }
@@ -148,8 +155,8 @@ public class ModeratorService {
         List<News> allNews = newsDao.findAll();
         List<NewsTimelineResponse> allNewsResponseTimeline = new ArrayList<>();
         for (News news : allNews) {
-            allNewsResponseTimeline.add(new NewsTimelineResponse(news.getTitle(), news.getText(), news.isRedactered(),
-                    news.getImage() != null ? news.getImage().getFilePath() : null));
+            allNewsResponseTimeline.add(new NewsTimelineResponse(news.getTitle(), news.getText(), news.getDateOfCreation(),
+                    news.isRedactered(), news.getImage() != null ? news.getImage().getFilePath() : null));
         }
         return allNewsResponseTimeline;
     }

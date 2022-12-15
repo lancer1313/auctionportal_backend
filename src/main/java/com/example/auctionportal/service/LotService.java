@@ -37,7 +37,7 @@ public class LotService {
     }
 
     public MessageResponse createLot(LotRequest lotRequest) throws FileManagerException, NoFileFoundException {
-        if (lotRequest.getFile().getContentType() == null) {
+        if (lotRequest.getFile() == null) {
             throw new NoFileFoundException("И что вы собираетесь продавать?");
         }
         Object principal = SecurityContextHolder.getContext()
@@ -86,17 +86,19 @@ public class LotService {
         return lotsData;
     }
 
-    public MessageResponse redactLot(LotRequest lotRequest, Long id) throws FileManagerException, NoFileFoundException {
-        if (lotRequest.getFile().getContentType() == null) {
-            throw new NoFileFoundException("И что вы собираетесь продавать?");
-        }
-        MultipartFile file = lotRequest.getFile();
-        Lot lot = lotDao.findById(id).get();
+    public MessageResponse redactLot(LotRequest lotRequest, Long id) throws FileManagerException {
 
+        Lot lot = lotDao.findById(id).get();
         lot.setLotTitle(lotRequest.getLotTitle());
         lot.setLotDescription(lotRequest.getLotDescription());
         lot.setStartingPrice(Integer.parseInt(lotRequest.getStartingPrice()));
         lot.setMinimalStep(Integer.parseInt(lotRequest.getMinimalStep()));
+
+        if (lotRequest.getFile() == null) {
+            lotDao.save(lot);
+            return new MessageResponse("Лот был изменен без трогания файла");
+        }
+        MultipartFile file = lotRequest.getFile();
 
         String fileName = file.getOriginalFilename();
         String filePath = FOLDER_PATH + UUID.randomUUID() + fileName;

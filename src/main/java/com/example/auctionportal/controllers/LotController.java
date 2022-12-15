@@ -41,7 +41,7 @@ public class LotController {
     }
 
     @PutMapping("/redact/{id}")
-    public ResponseEntity<?> redactLot(@ModelAttribute @Valid LotRequest lotRequest, @PathVariable Long id) throws FileManagerException, NoFileFoundException {
+    public ResponseEntity<?> redactLot(@ModelAttribute @Valid LotRequest lotRequest, @PathVariable Long id) throws FileManagerException {
         return ResponseEntity.status(HttpStatus.OK).body(lotService.redactLot(lotRequest, id));
     }
 

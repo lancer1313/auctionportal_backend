@@ -29,7 +29,7 @@ public class AdminService {
         return usersInfo;
     }
 
-    // TO DO удаляем аватар в файловой системе
+    // Удалять аватары и файлы лотов в файловой системе?
     public MessageResponse deleteUser(Long id) {
         userDao.deleteById(id);
         return new MessageResponse(id.toString());

@@ -5,13 +5,15 @@ public class NewsTableResponse {
     private Long id;
     private String title;
     private String text;
+    private String dateOfCreation;
     private boolean isRedactered;
     private String fileName;
 
-    public NewsTableResponse(Long id, String title, String text, boolean isRedactered, String fileName) {
+    public NewsTableResponse(Long id, String title, String text, String dateOfCreation, boolean isRedactered, String fileName) {
         this.id = id;
         this.title = title;
         this.text = text;
+        this.dateOfCreation = dateOfCreation;
         this.isRedactered = isRedactered;
         this.fileName = fileName;
     }
@@ -38,6 +40,14 @@ public class NewsTableResponse {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getDateOfCreation() {
+        return dateOfCreation;
+    }
+
+    public void setDateOfCreation(String dateOfCreation) {
+        this.dateOfCreation = dateOfCreation;
     }
 
     public boolean isRedactered() {

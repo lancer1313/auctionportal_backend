@@ -13,15 +13,18 @@ public class News {
     private String title;
     @Column(name = "text")
     private String text;
+    @Column(name = "created_at")
+    private String dateOfCreation;
     @Column(name = "redactered")
     private boolean isRedactered;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private NewsFile image;
 
-    public News(String title, String text, boolean isRedactered) {
+    public News(String title, String text, String dateOfCreation, boolean isRedactered) {
         this.title = title;
         this.text = text;
+        this.dateOfCreation = dateOfCreation;
         this.isRedactered = isRedactered;
     }
 
@@ -51,6 +54,14 @@ public class News {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getDateOfCreation() {
+        return dateOfCreation;
+    }
+
+    public void setDateOfCreation(String dateOfCreation) {
+        this.dateOfCreation = dateOfCreation;
     }
 
     public boolean isRedactered() {

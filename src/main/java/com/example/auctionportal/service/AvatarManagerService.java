@@ -36,23 +36,29 @@ public class AvatarManagerService {
             User user = userDao.findById(userDetails.getId()).get();
             String fileName = image.getOriginalFilename();
             String filePath = FOLDER_PATH + UUID.randomUUID() + fileName;
-            UserFile avatar = new UserFile(image.getOriginalFilename(), image.getContentType(), filePath);
+            UserFile avatar;
+            if (user.getAvatar() != null) {
+                String deleteFilePath = user.getAvatar().getFilePath();
+                avatar = userFileDao.findById(user.getAvatar().getId()).get();
+                avatar.setName(image.getOriginalFilename());
+                avatar.setType(image.getContentType());
+                avatar.setFilePath(filePath);
 
-            String deleteFilePath = user.getAvatar().getFilePath();
-            if (deleteFilePath != null) {
                 File deleteFile = new File(deleteFilePath);
                 if (!deleteFile.delete()) {
                     throw new FileManagerException("Ошибка удаления файла");
                 }
+                userDao.save(user);
+            } else {
+                avatar = new UserFile(image.getOriginalFilename(), image.getContentType(), filePath);
             }
-
+            user.setAvatar(avatar);
+            userFileDao.save(avatar);
             try {
                 image.transferTo(new File(filePath));
             } catch (IOException e) {
                 throw new FileManagerException("Произошла ошибка сохранения файла");
             }
-            user.setAvatar(avatar);
-            userFileDao.save(avatar);
             return new MessageResponse("Файл сохранен");
         }
         throw new InvalidFileFormatException("Недопустимый формат файла");
@@ -64,7 +70,7 @@ public class AvatarManagerService {
         UserDetailsImpl userDetails = (UserDetailsImpl) principal;
         String filePath;
         if (userDetails.getAvatar() != null) {
-            UserFile userFile = userFileDao.findById(userDetails.getId()).get();
+            UserFile userFile = userFileDao.findById(userDetails.getAvatar().getId()).get();
             filePath = userFile.getFilePath();
         } else {
             filePath = FOLDER_PATH + DEFAULT_IMAGE;
