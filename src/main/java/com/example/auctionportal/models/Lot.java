@@ -11,7 +11,7 @@ public class Lot {
     private Long id;
     @Column(name = "lot_title")
     private String lotTitle;
-    @Column(name = "lot_description")
+    @Column(name = "lot_description", length = 500)
     private String lotDescription;
     @Column(name = "starting_page")
     private int startingPrice;

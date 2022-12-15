@@ -11,7 +11,7 @@ public class News {
     private Long id;
     @Column(name = "title")
     private String title;
-    @Column(name = "text")
+    @Column(name = "text", length = 2000)
     private String text;
     @Column(name = "created_at")
     private String dateOfCreation;
