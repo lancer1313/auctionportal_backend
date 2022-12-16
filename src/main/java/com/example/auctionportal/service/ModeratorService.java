@@ -95,7 +95,7 @@ public class ModeratorService {
                     newsDao.save(news);
                     news.setImage(newsFile);
                     newsFileDao.save(newsFile);
-                    return new MessageResponse("Новость с новой картинкой изменена");
+                    return new MessageResponse("Новость изменена с сменой изображения");
                 }
                 try {
                     image.transferTo(new File(filePath));
@@ -106,26 +106,29 @@ public class ModeratorService {
                 NewsFile newsFile = new NewsFile(fileName, image.getContentType(), filePath);
                 news.setImage(newsFile);
                 newsFileDao.save(newsFile);
-                return new MessageResponse("Новость теперь с картинкой изменена");
+                return new MessageResponse("Новость изменена с добавлением изображения");
             }
             throw new InvalidFileFormatException("Недопустимый формат файла");
         }
+        News news = newsDao.findById(id).get();
+        news.setTitle(newsRequest.getTitle());
+        news.setText(newsRequest.getText());
+        news.setRedactered(true);
+        newsDao.save(news);
+        return new MessageResponse("Новость изменена, изображение - нет");
+    }
+
+    public MessageResponse redactImage(Long id) {
         News news = newsDao.findById(id).get();
         if (news.getImage() != null) {
             Long imageId = news.getImage().getId();
             news.setImage(null);
             newsFileDao.deleteById(imageId);
-            news.setTitle(newsRequest.getTitle());
-            news.setText(newsRequest.getText());
             news.setRedactered(true);
             newsDao.save(news);
-            return new MessageResponse("Новость изменена с убиранием файла");
+            return new MessageResponse("Изображение было удалено");
         }
-        news.setTitle(newsRequest.getTitle());
-        news.setText(newsRequest.getText());
-        news.setRedactered(true);
-        newsDao.save(news);
-        return new MessageResponse("Новость изменена без добавления картинки");
+        return new MessageResponse("Нечего удалять, файла не было");
     }
 
     public MessageResponse deleteNews(Long id) throws FileManagerException {

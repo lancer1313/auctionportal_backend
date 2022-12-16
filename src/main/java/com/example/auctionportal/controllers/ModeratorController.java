@@ -51,4 +51,10 @@ public class ModeratorController {
         return ResponseEntity.status(HttpStatus.OK).body(moderatorService.redactNews(newsRequest, id));
     }
 
+    @PutMapping("/redact_file/{id}")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> redactImage(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(moderatorService.redactImage(id));
+    }
+
 }
